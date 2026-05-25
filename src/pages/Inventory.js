@@ -173,7 +173,11 @@ export default function Inventory() {
   return (
     <>
       <Helmet>
-        <title>Inventory | AutoNorth Motors Edmonton — Premium Vehicles</title>
+        <title>Inventory | Premium New & Used Vehicles Edmonton | AutoNorth Motors</title>
+        <meta name="description" content="Browse Edmonton's largest selection of premium new and used Ford trucks, SUVs, and luxury vehicles. Zero dealer fees. Find your dream car at AutoNorth Motors." />
+        <meta name="keywords" content="used cars Edmonton inventory, Ford trucks Alberta, luxury cars for sale Edmonton, pre-owned vehicles Alberta" />
+        <meta property="og:title" content="Premium Vehicle Inventory | AutoNorth Motors Edmonton" />
+        <meta property="og:description" content="Browse our extensive inventory of high-quality new and used vehicles in Edmonton, Alberta." />
       </Helmet>
       <div className="bg-[#050505] min-h-screen" data-testid="inventory-page">
         <Navbar />

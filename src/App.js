@@ -4,6 +4,7 @@ import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import ChatBot from './components/ChatBot';
+import GlobalPreloader from './components/GlobalPreloader';
 
 import Home from './pages/Home';
 import Inventory from './pages/Inventory';
@@ -34,6 +35,7 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
+      <GlobalPreloader />
       {!isAdmin && <ChatBot />}
       <Routes>
         <Route path="/" element={<Home />} />

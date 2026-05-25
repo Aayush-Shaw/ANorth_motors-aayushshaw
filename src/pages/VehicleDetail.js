@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
-import { ArrowLeft, ChevronLeft, ChevronRight, Check, Phone, MessageSquare, Calendar, Zap } from 'lucide-react';
+import { ArrowLeft, ChevronLeft, ChevronRight, Check, Phone, MessageSquare, Calendar, Zap, Share2, Facebook, Twitter, Link as LinkIcon, DollarSign } from 'lucide-react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
@@ -36,7 +36,20 @@ export default function VehicleDetail() {
 
   useEffect(() => {
     axios.get(`${API}/vehicles/${id}`)
-      .then(({ data }) => setVehicle(data))
+      .then(({ data }) => {
+        setVehicle(data);
+        // Fire Meta Pixel ViewContent Event
+        if (window.fbq && data) {
+          window.fbq('track', 'ViewContent', {
+            content_name: data.title,
+            content_category: 'Vehicle',
+            content_ids: [data._id || data.id],
+            content_type: 'product',
+            value: data.price || 0,
+            currency: 'CAD'
+          });
+        }
+      })
       .catch(() => navigate('/inventory'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
@@ -68,6 +81,15 @@ export default function VehicleDetail() {
         preferred_time: form.preferred_time || undefined,
         down_payment: form.down_payment ? parseFloat(form.down_payment) : undefined,
       });
+      
+      // Fire Meta Pixel Lead Event
+      if (window.fbq) {
+        window.fbq('track', 'Lead', {
+          content_name: vehicle?.title,
+          content_category: activeTab
+        });
+      }
+      
       setSubmitted(true);
     } catch (err) { console.error(err); }
     finally { setSending(false); }
@@ -168,6 +190,8 @@ export default function VehicleDetail() {
                       key={imgIdx}
                       src={images[imgIdx]}
                       alt={vehicle.title}
+                      fetchpriority="high"
+                      loading="eager"
                       className="absolute inset-0 w-full h-full object-cover"
                       style={{
                         x: galleryHovered ? mousePos.x * -30 : 0,
@@ -211,11 +235,47 @@ export default function VehicleDetail() {
                   {images.map((img, i) => (
                     <button key={i} onClick={() => setImgIdx(i)}
                       className={`flex-shrink-0 w-20 h-14 overflow-hidden transition-all border-2 ${i === imgIdx ? 'border-[#D4AF37]' : 'border-transparent opacity-40 hover:opacity-70'}`}>
-                      <img src={img} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.src = PLACEHOLDER; }} />
+                      <img src={img} alt="" loading="lazy" decoding="async" className="w-full h-full object-cover" onError={(e) => { e.target.src = PLACEHOLDER; }} />
                     </button>
                   ))}
                 </div>
               )}
+
+              {/* Action Bar: Trade-In & Social Share */}
+              <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 glass-card border border-white/5 bg-gradient-to-r from-black/80 to-[#111]">
+                <button 
+                  onClick={() => {
+                    setActiveTab('contact');
+                    setForm(f => ({ ...f, message: 'I am interested in getting a trade-in value for my current vehicle.' }));
+                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+                  }}
+                  className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#D4AF37] hover:bg-[#b08d28] text-black font-heading font-bold uppercase tracking-wider text-sm transition-all"
+                >
+                  {SAFE_ICON(DollarSign, { size: 16 })} Get Instant Trade-In Value
+                </button>
+                
+                <div className="flex items-center gap-3">
+                  <span className="text-white/40 text-xs font-heading uppercase tracking-widest mr-2">Share</span>
+                  <button 
+                    onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${window.location.href}`, '_blank')}
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#1877F2] text-white/60 hover:text-white flex items-center justify-center transition-all"
+                  >
+                    {SAFE_ICON(Facebook, { size: 18 })}
+                  </button>
+                  <button 
+                    onClick={() => window.open(`https://twitter.com/intent/tweet?url=${window.location.href}&text=Check out this ${vehicle.title} at AutoNorth Motors!`, '_blank')}
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#1DA1F2] text-white/60 hover:text-white flex items-center justify-center transition-all"
+                  >
+                    {SAFE_ICON(Twitter, { size: 18 })}
+                  </button>
+                  <button 
+                    onClick={() => { navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!'); }}
+                    className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/20 text-white/60 hover:text-white flex items-center justify-center transition-all"
+                  >
+                    {SAFE_ICON(LinkIcon, { size: 18 })}
+                  </button>
+                </div>
+              </div>
 
               {/* Description */}
               <div className="mt-6 glass-card p-6">

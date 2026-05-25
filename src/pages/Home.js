@@ -111,8 +111,11 @@ export default function Home() {
   return (
     <>
       <Helmet>
-        <title>AutoNorth Motors | Premium Dealership</title>
-        <meta name="description" content="Discover Edmonton's finest selection of premium vehicles. AutoNorth Motors - Where quality meets the road." />
+        <title>AutoNorth Motors | Premium Ford & Luxury Dealership in Edmonton</title>
+        <meta name="description" content="Edmonton's premier auto dealership. Discover high-quality new and used Ford trucks, SUVs, and luxury cars. Serving Alberta with transparent pricing and zero dealer fees. Book a test drive today." />
+        <meta name="keywords" content="Edmonton car dealership, Ford dealer Alberta, used trucks Edmonton, luxury cars Alberta, AutoNorth Motors" />
+        <meta property="og:title" content="AutoNorth Motors | Premium Dealership in Edmonton" />
+        <meta property="og:description" content="Edmonton's top destination for premium new and used vehicles. Zero dealer fees. Best price guaranteed." />
       </Helmet>
 
       <div className="bg-[#050505] min-h-screen font-body selection:bg-[#D4AF37]/30" data-testid="home-page">

@@ -94,14 +94,23 @@ async def global_exception_handler(request: Request, exc: Exception):
     if "NoneType" in error_msg and "vehicles" in error_msg:
         return JSONResponse(status_code=503, content={"error": "Database Unavailable", "message": "The system is currently unable to connect to the inventory database."})
 
-    msg = f"Platform conflict: {error_type} - {error_msg}"
-    return JSONResponse(status_code=500, content={"error": "Internal Server Error", "message": msg})
+    # Sanitize the error message to prevent leaking internal paths or stack details
+    sanitized_msg = "An unexpected server error occurred."
+    if "Connection refused" in error_msg: sanitized_msg = "Upstream connection refused."
+    
+    return JSONResponse(status_code=500, content={"error": "Internal Server Error", "message": sanitized_msg})
 
-# --- DB Middleware ---
+# --- Security & DB Middleware ---
 @app.middleware("http")
-async def db_session_middleware(request: Request, call_next):
+async def security_and_db_middleware(request: Request, call_next):
     get_db()
-    return await call_next(request)
+    response = await call_next(request)
+    # Strict Security Headers
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 def safe_price(v):
     try:
@@ -677,6 +686,25 @@ async def sync_teamford_scraper(cu=Depends(get_current_user)):
     except Exception as e:
         logger.error(f"Team Ford sync error: {e}")
         raise HTTPException(500, "Failed to sync with Team Ford")
+    finally:
+        # Reset scraper status for the next run
+        await db.settings.update_one(
+            {"type": "scraper_status"},
+            {"$set": {"status": "idle", "progress": "Ready to sync."}},
+            upsert=True
+        )
+
+@api_router.get("/scraper/status")
+async def get_scraper_status(cu=Depends(get_current_user)):
+    status_doc = await db.settings.find_one({"type": "scraper_status"})
+    if not status_doc:
+        return {"status": "idle", "progress": "Ready to sync."}
+    return {
+        "status": status_doc.get("status", "idle"),
+        "progress": status_doc.get("progress", "Ready to sync."),
+        "imported": status_doc.get("imported", 0),
+        "updated": status_doc.get("updated", 0)
+    }
 
 async def get_ai_response(message: str, inventory_docs: list):
     """Indestructible AI Engine with Global Health Monitoring"""
@@ -865,6 +893,25 @@ async def startup():
                 "created_at": datetime.now(timezone.utc)
             })
             logger.info(f"Admin user seeded/restored: {admin_email}")
+
+        # Performance Indexes for "1000x" speed
+        logger.info("Building High-Performance Database Indexes...")
+        import pymongo
+        await _db.vehicles.create_index([("status", pymongo.ASCENDING), ("created_at", pymongo.DESCENDING)])
+        await _db.vehicles.create_index([("make", pymongo.ASCENDING), ("model", pymongo.ASCENDING)])
+        await _db.vehicles.create_index([("price", pymongo.ASCENDING)])
+        await _db.vehicles.create_index([("featured", pymongo.ASCENDING)])
+        await _db.vehicles.create_index([("show_on_home", pymongo.ASCENDING)])
+        # Text index for search
+        await _db.vehicles.create_index([
+            ("title", pymongo.TEXT), 
+            ("make", pymongo.TEXT), 
+            ("model", pymongo.TEXT), 
+            ("vin", pymongo.TEXT), 
+            ("stock_number", pymongo.TEXT)
+        ])
+        logger.info("Indexes built successfully.")
+
     except Exception as e:
         logger.error(f"Startup failed: {e}")
 

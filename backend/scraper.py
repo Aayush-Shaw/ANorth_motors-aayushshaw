@@ -142,53 +142,46 @@ async def scrape_teamford_inventory(limit: int = 2000) -> List[Dict[str, Any]]:
                     break
 
                 for h in hits:
-                    def get_price(hit):
-                        p = hit.get("pricing", {}).get("sell_price", 0)
-                        if p is None: p = hit.get("list_price", 0)
-                        if p is None: p = hit.get("retail_price", 0)
-                        if p is None: return 0.0
-                        try: return float(p)
-                        except: return 0.0
-
-                    price = get_price(h)
-
-                    images = [img.get("url") for img in h.get("images", []) if img.get("url")]
-                    if not images and h.get("thumbnail_url"): images = [h.get("thumbnail_url")]
-
-                    vin = h.get("vin")
-                    stock = h.get("stock_number")
-                    if not vin and not stock: continue
-
                     def safe_int(val, default=0):
                         if val is None: return default
                         try: return int(val)
                         except: return default
 
+                    price = h.get("special_price") or h.get("list_price") or h.get("regular_price") or h.get("sort_price") or 0.0
+                    try: price = float(price)
+                    except: price = 0.0
+
+                    images = [f"https://media.goauto.ca/image/upload/c_fill,g_center,w_800/v1/{pid}.jpg" for pid in h.get("photo_service_ids", [])]
+
+                    vin = h.get("vin")
+                    stock = h.get("stock_number")
+                    if not vin and not stock: continue
+
                     vehicle_doc = {
                         "vin": vin,
                         "stock_number": stock,
-                        "title": sanitize(f"{h.get('year')} {h.get('make')} {h.get('model')} {h.get('trim', '')}".strip()),
-                        "make": h.get("make"),
-                        "model": h.get("model"),
+                        "title": sanitize(f"{h.get('year')} {h.get('make_name')} {h.get('model_name')} {h.get('trim', '')}".strip()),
+                        "make": h.get("make_name"),
+                        "model": h.get("model_name"),
                         "year": safe_int(h.get("year"), 2024),
                         "price": price,
                         "mileage": safe_int(h.get("odometer")),
                         "condition": str(h.get("stock_type", "used")).lower(),
-                        "body_type": h.get("body_style") or h.get("body_type_category"),
-                        "fuel_type": h.get("fuel_type_category") or h.get("fuel_type", "Gas"),
-                        "transmission": h.get("transmission_description") or h.get("transmission", "Automatic"),
-                        "drivetrain": h.get("drive_type_name") or h.get("drivetrain"),
-                        "exterior_color": h.get("exterior_colour") or h.get("exterior_color"),
-                        "interior_color": h.get("interior_colour") or h.get("interior_color"),
-                        "engine": h.get("engine_description") or h.get("engine"),
-                        "description": sanitize(h.get("comments", f"Certified premium {h.get('make')} {h.get('model')} available at AutoNorth Motors.")),
-                        "features": [sanitize(f.get("name")) for f in h.get("features", []) if f.get("name")],
+                        "body_type": h.get("body_type_category") or h.get("body_type_name"),
+                        "fuel_type": h.get("fuel_type_category") or h.get("fuel_type_name", "Gas"),
+                        "transmission": h.get("transmission_name") or h.get("transmission_type", "Automatic"),
+                        "drivetrain": h.get("drive_type_name"),
+                        "exterior_color": h.get("exterior_colour_name"),
+                        "interior_color": h.get("interior_colour_name"),
+                        "engine": f"{h.get('engine_litres', '')}L {h.get('engine_config_name', '')}{h.get('engine_cylinders', '')}".strip() or h.get("engine_compressor_name"),
+                        "description": sanitize(h.get("description") or f"Certified premium {h.get('make_name')} {h.get('model_name')} available at AutoNorth Motors."),
+                        "features": [sanitize(f) for f in h.get("equipment", []) if f],
                         "images": images,
                         "status": "available",
                         "source": "teamford_sync",
                         "featured": h.get("is_featured", False),
                         "is_on_special": h.get("is_on_special", False),
-                        "source_url": f"https://www.teamford.ca/vehicles/{h.get('slug')}" if h.get('slug') else ""
+                        "source_url": f"https://www.teamford.ca/vehicles/{h.get('objectID')}" if h.get('objectID') else ""
                     }
                     all_vehicles.append(vehicle_doc)
 
@@ -312,10 +305,18 @@ async def sync_teamford_listings() -> Dict[str, int]:
     Returns dict with 'imported' and 'updated' counts.
     """
     try:
+        from server import db
+        await db.settings.update_one(
+            {"type": "scraper_status"}, 
+            {"$set": {"status": "fetching_algolia", "progress": "Fetching data from Algolia API...", "imported": 0, "updated": 0}}, 
+            upsert=True
+        )
+
         vehicles = await scrape_teamford_inventory(limit=2000)
         imported, updated = 0, 0
-        from server import db
-        for v in vehicles:
+        total = len(vehicles)
+        
+        for i, v in enumerate(vehicles):
             vin, stock = v.get("vin"), v.get("stock_number")
             if not vin and not stock: continue
             existing = None
@@ -328,7 +329,28 @@ async def sync_teamford_listings() -> Dict[str, int]:
                 v["created_at"] = datetime.now(timezone.utc)
                 await db.vehicles.insert_one(v)
                 imported += 1
+                
+            # Update progress every 20 vehicles to avoid overwhelming DB
+            if i % 20 == 0 or i == total - 1:
+                await db.settings.update_one(
+                    {"type": "scraper_status"}, 
+                    {"$set": {"status": "syncing", "progress": f"Synced {i+1} of {total} vehicles...", "imported": imported, "updated": updated}}, 
+                    upsert=True
+                )
+
+        await db.settings.update_one(
+            {"type": "scraper_status"}, 
+            {"$set": {"status": "idle", "progress": "Sync complete.", "imported": imported, "updated": updated}}, 
+            upsert=True
+        )
+
         return {"imported": imported, "updated": updated}
     except Exception as e:
         logger.error(f"Sync failed: {e}")
+        from server import db
+        await db.settings.update_one(
+            {"type": "scraper_status"}, 
+            {"$set": {"status": "error", "progress": f"Failed: {str(e)}"}}, 
+            upsert=True
+        )
         return {"imported": 0, "updated": 0}

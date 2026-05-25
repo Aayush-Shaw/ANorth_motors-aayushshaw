@@ -74,6 +74,8 @@ export default function VehicleCard({ vehicle, index = 0 }) {
             <motion.img
               src={img}
               alt={vehicle.title}
+              loading="lazy"
+              decoding="async"
               className="absolute inset-0 w-full h-full object-cover"
               style={{
                 x: imgX,
@@ -117,6 +119,17 @@ export default function VehicleCard({ vehicle, index = 0 }) {
                 </div>
               </div>
             )}
+
+            {/* Quick View Hover Action */}
+            <div 
+              className="absolute inset-0 z-15 flex items-center justify-center pointer-events-none transition-opacity duration-300"
+              style={{ opacity: hovered && !isSold ? 1 : 0 }}
+            >
+              <div className="bg-black/80 backdrop-blur-sm border border-[#D4AF37]/50 px-6 py-3 rounded-full flex items-center gap-2 transform translate-y-4 shadow-[0_0_20px_rgba(212,175,55,0.2)]">
+                <span className="text-[#D4AF37] text-xs font-bold uppercase tracking-widest">Quick View</span>
+                <ArrowRight size={14} className="text-[#D4AF37]" />
+              </div>
+            </div>
 
             {/* Price — floats in 3D space */}
             <div className="absolute bottom-4 left-4 z-20" style={{ transform: 'translateZ(15px)' }}>

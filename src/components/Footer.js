@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="bg-[#020202] border-t border-white/5 pt-20 pb-8">
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
           <div className="md:col-span-1">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 bg-[#D4AF37] flex items-center justify-center font-heading font-bold text-black text-lg">
@@ -56,6 +56,19 @@ export default function Footer() {
                   <Link to={`/inventory?body_type=${item}`} className="text-white/40 hover:text-white text-sm font-body transition-colors duration-200">
                     {item}
                   </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="font-heading text-xs tracking-[0.2em] uppercase text-white/50 mb-6">Areas Served</h4>
+            <ul className="space-y-3">
+              {['Edmonton', 'Sherwood Park', 'St. Albert', 'Leduc', 'Spruce Grove', 'All of Alberta'].map((item) => (
+                <li key={item}>
+                  <span className="text-white/40 text-sm font-body cursor-default">
+                    {item}
+                  </span>
                 </li>
               ))}
             </ul>

@@ -8,6 +8,7 @@ import {
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import AdminLayout from '../components/AdminLayout';
+import MarketplaceGenerator from '../components/MarketplaceGenerator';
 
 const SAFE_ICON = (Icon, props = {}) => {
   if (!Icon || (typeof Icon !== 'function' && typeof Icon !== 'object')) return null;
@@ -86,7 +87,7 @@ export default function AdminInventory() {
       setVehicles(data.vehicles || []);
       setTotal(data.total || 0);
     } catch (err) { console.error(err); } finally { setLoading(false); }
-  }, [page, search]);
+  }, [page, search, limit]);
 
   const fetchScraperSettings = useCallback(async () => {
     try {
@@ -189,17 +190,42 @@ export default function AdminInventory() {
     catch (err) { console.error(err); }
   };
 
+  const [scraperProgress, setScraperProgress] = useState(null);
+
   const handleSyncNow = async () => {
     setScraperLoading(true);
     setSyncStatus(null);
+    setScraperProgress('Initializing sync...');
+    
+    const interval = setInterval(async () => {
+      try {
+        const { data } = await axios.get(`${API}/scraper/status`, { withCredentials: true });
+        if (data.status === 'syncing' || data.status === 'fetching_algolia') {
+          setScraperProgress(data.progress);
+        } else if (data.status === 'error') {
+          clearInterval(interval);
+          setScraperProgress("Scraper encountered an error.");
+        }
+      } catch (err) { }
+    }, 1500);
+
     try { 
       const { data } = await axios.post(`${API}/scraper/sync/teamford`, {}, { withCredentials: true }); 
-      setSyncStatus({ added: data.added, updated: data.updated, deleted: data.deleted });
+      clearInterval(interval);
+      setSyncStatus({ added: data.imported, updated: data.updated });
+      setScraperProgress(null);
       fetchVehicles(); 
       fetchScraperSettings(); 
     }
-    catch (err) { console.error(err); alert("Sync failed. Check logs."); } 
-    finally { setScraperLoading(false); }
+    catch (err) { 
+      clearInterval(interval);
+      console.error(err); 
+      setScraperProgress('Sync failed. Check logs.');
+    } 
+    finally { 
+      setScraperLoading(false); 
+      setTimeout(() => setScraperProgress(null), 3000);
+    }
   };
 
   const handleUrlImport = async () => {
@@ -275,9 +301,14 @@ export default function AdminInventory() {
                       {SAFE_ICON(RefreshCw, { size: 11, className: scraperLoading ? 'animate-spin' : '' })} 
                       {scraperLoading ? 'Syncing...' : 'Sync TeamFord'}
                    </button>
-                   {syncStatus && (
+                   {scraperProgress && (
+                     <p className="text-[#D4AF37] text-[9px] font-heading uppercase tracking-widest animate-pulse">
+                       {scraperProgress}
+                     </p>
+                   )}
+                   {syncStatus && !scraperProgress && (
                      <p className="text-emerald-400 text-[9px] font-heading uppercase tracking-widest animate-fade-in">
-                       Success: {syncStatus.added} added, {syncStatus.updated} updated, {syncStatus.deleted || 0} removed
+                       Success: {syncStatus.added} added, {syncStatus.updated} updated
                      </p>
                    )}
                  </div>
@@ -533,6 +564,9 @@ export default function AdminInventory() {
                           ))}
                         </div>
                       </section>
+                      
+                      {/* Marketplace Generator Tool */}
+                      {editing && <MarketplaceGenerator vehicle={form} />}
                     </div>
                   </>
                 )}
