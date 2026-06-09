@@ -706,126 +706,69 @@ async def get_scraper_status(cu=Depends(get_current_user)):
         "updated": status_doc.get("updated", 0)
     }
 
-async def get_ai_response(message: str, inventory_docs: list):
-    """Indestructible AI Engine with Global Health Monitoring"""
-    s = await db.settings.find_one({"type": "general"}) or {}
-    provider_raw = s.get("ai_provider") or os.environ.get("AI_PROVIDER") or "local"
-    provider = str(provider_raw).lower()
-    api_key = s.get("ai_api_key") or os.environ.get("AI_API_KEY")
-    custom_model = s.get("ai_model")
-
-    # ── 2. The 'Local Brain' (Works Offline / Fallback) ──
-    async def local_fallback(msg, docs):
-        query = str(msg or "").lower()
-        price_match = re.search(r'(?:under|below|less than|max|up to|around|within)\s*\$?(\d+(?:k|000)?)', query)
-        max_price = 1000000
-        if price_match:
-            p_val = price_match.group(1).replace('k', '000')
-            try: max_price = float(p_val)
-            except: pass
-        matches = []
-        for v in docs:
-            p = safe_price(v)
-            if p <= max_price:
-                keywords = [v.get('make'), v.get('model'), v.get('body_type'), v.get('title')]
-                if any(str(k or "").lower() in query for k in keywords):
-                    matches.append(f"{v.get('year')} {v.get('make')} {v.get('model')} (${p:,.0f})")
-        await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "local", "last_active": datetime.now(timezone.utc)}})
-        if matches:
-            return f"Specialist here! I found {len(matches)} matches. Top picks: {', '.join(matches[:3])}. Would you like more details or a test drive?"
-        return f"We have {len(docs)} vehicles available! What are you looking for? (e.g. Ford, SUV, under $30k)"
-
-    if provider == "local" or not api_key:
-        return await local_fallback(message, inventory_docs)
-
-    try:
-        # ── 1. Create a Clean, Human-Readable Inventory Summary ──
-        inventory_summary = "\n".join([
-            f"• {v.get('year')} {v.get('make')} {v.get('model')} - ${safe_price(v):,.0f} (Link: [View Detail](/vehicle/{str(v.get('_id', ''))}))" 
-            for v in inventory_docs[:15]
-        ])
-        
-        system_prompt = (
-            "You are the AutoNorth AI Specialist. Professional, luxury-focused, and highly sales-oriented. "
-            "Your goal is to help visitors find their perfect vehicle and capture their contact info. "
-            "IMPORTANT: When listing vehicles, NEVER show the raw 'Vehicle ID' string (e.g., 69ecb9...). "
-            "ALWAYS use the 'Year Make Model' as the title. "
-            "When mentioning a vehicle, ALWAYS use this exact link format: [Year Make Model](/vehicle/ID). "
-            "Use markdown tables for comparisons, but keep the first column as the vehicle name, NOT the ID. "
-            "Always end with a strong, helpful call to action to book a test drive. "
-            f"Current Fleet Context:\n{inventory_summary}\nTotal vehicles available: {len(inventory_docs)}."
-        )
-
-        if provider == "gemini":
-            if not HAS_GENAI: return "AI Specialist is offline (SDK missing). Call 825-605-5050."
-            ai_client = genai.Client(api_key=api_key)
-            resp = ai_client.models.generate_content(model=custom_model or 'gemini-1.5-flash', config=genai.types.GenerateContentConfig(system_instruction=system_prompt), contents=message)
-            await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "online", "last_active": datetime.now(timezone.utc)}})
-            return resp.text
-        elif provider == "claude":
-            async with httpx.AsyncClient() as client:
-                resp = await client.post("https://api.anthropic.com/v1/messages", headers={"x-api-key": api_key, "anthropic-version": "2023-06-01", "content-type": "application/json"}, json={"model": custom_model or 'claude-3-haiku-20240307', "max_tokens": 512, "system": system_prompt, "messages": [{"role": "user", "content": message}]}, timeout=15.0)
-                await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "online", "last_active": datetime.now(timezone.utc)}})
-                return resp.json()["content"][0]["text"]
-        elif provider == "openrouter":
-            async with httpx.AsyncClient() as client:
-                resp = await client.post("https://openrouter.ai/api/v1/chat/completions",
-                    headers={"Authorization": f"Bearer {api_key}", "HTTP-Referer": "https://autonorth.ca", "X-Title": "AutoNorth"},
-                    json={"model": custom_model or 'openrouter/auto', "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": message}]}, timeout=15.0)
-                r_json = resp.json()
-                if "choices" in r_json:
-                    await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "online", "last_active": datetime.now(timezone.utc)}})
-                    return r_json["choices"][0]["message"]["content"]
-                raise Exception(r_json.get("error", {}).get("message", "API Error"))
-
-    except Exception as e:
-        logger.error(f"Global AI Fail ({provider}): {e}")
-        return await local_fallback(message, inventory_docs)
-
-@api_router.get("/health")
-async def health_check():
-    return {"status": "online", "has_genai": HAS_GENAI, "db_connected": db is not None, "timestamp": datetime.now(timezone.utc).isoformat()}
-
-@api_router.get("/debug")
-async def debug_info():
-    active_db = _db.name if _db else "Not Initialized"
-    return {
-        "env_keys": list(os.environ.keys()), 
-        "mongo_url_found": bool(os.environ.get('MONGODB_URI') or os.environ.get('MONGO_URL')), 
-        "active_db": active_db,
-        "python_version": sys.version
-    }
-
 @api_router.post("/chat")
-async def ai_chat(data: ChatRequest):
+async def ai_chat(data: ChatRequest, request: Request):
     try:
-        docs = await db.vehicles.find({"status": "available"}).sort("created_at", -1).to_list(100)
-        response_text = await get_ai_response(data.message, docs)
-
-        # AUTOMATIC LEAD EXTRACTION (Ghost Agent)
-        phone_match = re.search(r'(\d{10}|\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)\s*\d{3}[-\.\s]??\d{4})', data.message)
-        email_match = re.search(r'[\w\.-]+@[\w\.-]+\.\w+', data.message)
+        from scraper import NeuralKnowledge
+        inventory = await db.vehicles.find({"status": "available"}).sort("created_at", -1).to_list(100)
+        
+        s = await db.settings.find_one({"type": "general"}) or {}
+        provider_raw = s.get("ai_provider") or os.environ.get("AI_PROVIDER") or "local"
+        provider = str(provider_raw).lower()
+        api_key = s.get("ai_api_key") or os.environ.get("AI_API_KEY")
+        model = s.get("ai_model")
+        
+        response = await NeuralKnowledge.generate_response(data.message, inventory, provider, api_key, model)
+        
+        # Robust Lead Detection (Ghost Agent)
+        import re
+        email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+        phone_pattern = r'(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}'
+        
+        has_email = re.search(email_pattern, data.message)
+        has_phone = re.search(phone_pattern, data.message)
+        
         lead_captured = False
-        if phone_match or email_match:
-            phone = phone_match.group(0) if phone_match else None
-            email = email_match.group(0) if email_match else None
-            v_title, v_vin = "General Inquiry", "—"
+        if has_email or has_phone:
+            lead_info = {
+                "name": "Chat Lead",
+                "phone": has_phone.group(0) if has_phone else "N/A",
+                "email": has_email.group(0) if has_email else "N/A",
+                "message": f"Auto-captured during AI chat:\nUser: {data.message}\nAI: {response}",
+                "lead_type": "chat_capture",
+                "status": "new",
+                "created_at": datetime.now(timezone.utc)
+            }
             if data.vehicle_id:
                 try:
                     v_doc = await db.vehicles.find_one({"_id": ObjectId(data.vehicle_id)})
-                    if v_doc: v_title = f"{v_doc.get('year')} {v_doc.get('make')} {v_doc.get('model')}"; v_vin = v_doc.get('vin', '—')
+                    if v_doc: 
+                        lead_info["vehicle_title"] = f"{v_doc.get('year')} {v_doc.get('make')} {v_doc.get('model')}"
+                        lead_info["vehicle_vin"] = v_doc.get('vin', '—')
                 except: pass
-            lead_doc = {
-                "name": "AI Chat Visitor", "email": email, "phone": phone, "lead_type": "chat_capture", "vehicle_id": data.vehicle_id, "vehicle_title": v_title, "vehicle_vin": v_vin,
-                "message": f"CONVERSATION TRANSCRIPT:\nUser: {data.message}\nAI: {response_text}\n\n(Context: Captured via Ghost Agent)", "status": "new", "created_at": datetime.now(timezone.utc)
-            }
-            await db.leads.insert_one(lead_doc)
+            
+            await db.leads.insert_one(lead_info)
             lead_captured = True
-        return {"response": response_text, "lead_captured": lead_captured, "session_id": data.session_id}
-    except Exception as e:
-        logger.error(f"Chat Endpoint Error: {e}")
-        return {"response": "Specialist connection issue—call 825-605-5050."}
 
+        # Market Intelligence: Log search terms found in message
+        makes_list = ["ford", "ram", "chevrolet", "toyota", "honda", "jeep", "dodge", "nissan", "hyundai", "kia", "suv", "truck"]
+        found_terms = [w for w in makes_list if w in data.message.lower()]
+        if found_terms:
+            await db.searches.insert_one({
+                "query": " ".join(found_terms),
+                "timestamp": datetime.now(timezone.utc),
+                "source": "chatbot_ai",
+                "ip": request.client.host if request.client else "127.0.0.1"
+            })
+
+        await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "online", "last_active": datetime.now(timezone.utc)}})
+        return {"response": response, "lead_captured": lead_captured, "session_id": data.session_id}
+
+    except Exception as e:
+        import traceback
+        logger.error(f"Chat error: {e}\n{traceback.format_exc()}")
+        await db.settings.update_one({"type": "general"}, {"$set": {"ai_health": "error", "ai_error": str(e)}})
+        return {"response": "I'm having a technical moment. Please call us at 825-605-5050 or visit our Edmonton showroom."}
 
 @app.on_event("startup")
 async def startup():
