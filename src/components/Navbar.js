@@ -18,7 +18,7 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '/inventory', label: 'Inventory' },
+    { href: '/loan-calculator', label: 'Loan Calculator' },
     { href: '/financing', label: 'Financing' },
     { href: '/contact', label: 'Contact' },
   ];

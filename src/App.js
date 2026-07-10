@@ -10,6 +10,7 @@ import Home from './pages/Home';
 import Inventory from './pages/Inventory';
 import VehicleDetail from './pages/VehicleDetail';
 import Financing from './pages/Financing';
+import LoanCalculatorPage from './pages/LoanCalculatorPage';
 import Contact from './pages/Contact';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -42,6 +43,7 @@ function AppContent() {
         <Route path="/inventory" element={<Inventory />} />
         <Route path="/vehicle/:id" element={<VehicleDetail />} />
         <Route path="/financing" element={<Financing />} />
+        <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/showroom" element={<React.Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-[#D4AF37]">Loading Showroom...</div>}><Showroom /></React.Suspense>} />
         <Route path="/admin" element={<AdminLogin />} />

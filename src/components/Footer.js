@@ -33,9 +33,7 @@ export default function Footer() {
             <h4 className="font-heading text-xs tracking-[0.2em] uppercase text-white/50 mb-6">Quick Links</h4>
             <ul className="space-y-3">
               {[
-                { to: '/inventory', label: 'Browse Inventory' },
-                { to: '/inventory?condition=new', label: 'New Vehicles' },
-                { to: '/inventory?condition=used', label: 'Used Vehicles' },
+                { to: '/loan-calculator', label: 'Loan Calculator' },
                 { to: '/financing', label: 'Financing' },
                 { to: '/contact', label: 'Contact Us' },
               ].map((link) => (
