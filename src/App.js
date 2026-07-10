@@ -40,12 +40,12 @@ function AppContent() {
       {!isAdmin && <ChatBot />}
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/inventory" element={<Inventory />} />
-        <Route path="/vehicle/:id" element={<VehicleDetail />} />
+        {/* <Route path="/inventory" element={<Inventory />} /> */}
+        {/* <Route path="/vehicle/:id" element={<VehicleDetail />} /> */}
         <Route path="/financing" element={<Financing />} />
         <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
         <Route path="/contact" element={<Contact />} />
-        <Route path="/showroom" element={<React.Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-[#D4AF37]">Loading Showroom...</div>}><Showroom /></React.Suspense>} />
+        {/* <Route path="/showroom" element={<React.Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-[#D4AF37]">Loading Showroom...</div>}><Showroom /></React.Suspense>} /> */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
         <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventory /></ProtectedRoute>} />

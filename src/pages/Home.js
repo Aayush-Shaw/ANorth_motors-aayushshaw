@@ -178,8 +178,8 @@ export default function Home() {
               </motion.p>
 
               <motion.div variants={fadeUp} className="flex flex-wrap gap-4 mb-16">
-                <Link to="/inventory" className="btn-gold px-8 py-4 text-xs tracking-[0.15em] flex items-center gap-3" data-testid="hero-browse-btn">
-                  Browse Inventory {SAFE_ICON(ArrowRight, { size: 15 })}
+                <Link to="/loan-calculator" className="btn-gold px-8 py-4 text-xs tracking-[0.15em] flex items-center gap-3" data-testid="hero-browse-btn">
+                  Loan Calculator {SAFE_ICON(ArrowRight, { size: 15 })}
                 </Link>
                 <Link to="/financing" className="btn-outline px-8 py-4 text-xs tracking-[0.15em]" data-testid="hero-financing-btn">
                   Get Pre-Approved
@@ -230,8 +230,8 @@ export default function Home() {
                   Featured <span className="gradient-text">Vehicles</span>
                 </motion.h2>
                 <motion.div variants={fadeUp}>
-                  <Link to="/inventory" className="text-white/30 hover:text-[#D4AF37] text-sm font-body tracking-widest uppercase flex items-center gap-2 transition-colors">
-                    All Inventory {SAFE_ICON(ArrowRight, { size: 14 })}
+                  <Link to="/loan-calculator" className="text-white/30 hover:text-[#D4AF37] text-sm font-body tracking-widest uppercase flex items-center gap-2 transition-colors">
+                    Payment Calculator {SAFE_ICON(ArrowRight, { size: 14 })}
                   </Link>
                 </motion.div>
               </div>
@@ -303,8 +303,8 @@ export default function Home() {
 
             <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ delay: 0.6 }}
               className="text-center mt-12">
-              <Link to="/inventory" className="btn-gold px-10 py-4 text-sm tracking-[0.15em] inline-flex items-center gap-3">
-                View Full Collection {SAFE_ICON(ArrowRight, { size: 16 })}
+              <Link to="/loan-calculator" className="btn-gold px-10 py-4 text-sm tracking-[0.15em] inline-flex items-center gap-3">
+                Calculate Your Payment {SAFE_ICON(ArrowRight, { size: 16 })}
               </Link>
             </motion.div>
           </div>
@@ -323,7 +323,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
                   transition={{ delay: i * 0.06 }}
                   whileHover={{ y: -6, scale: 1.03 }}
-                  onClick={() => navigate(`/inventory?body_type=${encodeURIComponent(cat.query)}`)}
+                  onClick={() => navigate('/loan-calculator')}
                   className="group glass-card p-6 flex flex-col items-center text-center hover:border-[#D4AF37]/30 transition-all duration-300"
                   data-testid={`category-${cat.label.toLowerCase().replace(/\s+/g, '-')}`}
                 >
@@ -350,8 +350,8 @@ export default function Home() {
                 <p className="text-white/55 font-body text-lg leading-relaxed mb-8">
                   We built AutoNorth on one principle: treat every customer the way we'd want to be treated. No games, no hidden fees, no pressure. Just expert guidance and the best prices in Edmonton.
                 </p>
-                <Link to="/inventory" className="btn-gold px-8 py-4 text-xs tracking-[0.15em] inline-flex items-center gap-3">
-                  Explore Our Inventory {SAFE_ICON(ArrowRight, { size: 15 })}
+                <Link to="/financing" className="btn-gold px-8 py-4 text-xs tracking-[0.15em] inline-flex items-center gap-3">
+                  Get Pre-Approved {SAFE_ICON(ArrowRight, { size: 15 })}
                 </Link>
               </motion.div>
 

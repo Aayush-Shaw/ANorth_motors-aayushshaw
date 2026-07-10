@@ -34,7 +34,7 @@ export default function Navbar() {
       data-testid="navbar"
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12">
-        <div className="flex items-center justify-between h-20">
+        <div className="relative flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3" data-testid="nav-logo">
             <div className="w-10 h-10 bg-[#D4AF37] flex items-center justify-center font-heading font-bold text-black text-lg">
               AN
@@ -45,7 +45,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden md:flex items-center gap-10 absolute left-1/2 -translate-x-1/2">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -65,7 +65,7 @@ export default function Navbar() {
               <Phone size={14} />
               <span>825-605-5050</span>
             </a>
-            {user ? (
+            {user && (
               <button
                 onClick={() => navigate('/admin/dashboard')}
                 className="btn-gold px-5 py-2 text-xs"
@@ -73,10 +73,6 @@ export default function Navbar() {
               >
                 Dashboard
               </button>
-            ) : (
-              <Link to="/inventory" className="btn-gold px-6 py-2 text-xs" data-testid="nav-browse-btn">
-                Browse Cars
-              </Link>
             )}
           </div>
 
@@ -109,13 +105,6 @@ export default function Navbar() {
                   {link.label}
                 </Link>
               ))}
-              <Link
-                to="/inventory"
-                className="btn-gold px-6 py-3 text-xs text-center"
-                onClick={() => setMobileOpen(false)}
-              >
-                Browse Inventory
-              </Link>
             </div>
           </motion.div>
         )}

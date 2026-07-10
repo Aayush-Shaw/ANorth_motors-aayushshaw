@@ -50,7 +50,7 @@ export default function VehicleDetail() {
           });
         }
       })
-      .catch(() => navigate('/inventory'))
+      .catch(() => navigate('/'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
 

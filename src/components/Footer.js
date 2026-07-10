@@ -46,18 +46,7 @@ export default function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-heading text-xs tracking-[0.2em] uppercase text-white/50 mb-6">Vehicle Types</h4>
-            <ul className="space-y-3">
-              {['Trucks', 'SUVs', 'Sedans', 'Coupes', 'Hybrid & Electric', 'Commercial'].map((item) => (
-                <li key={item}>
-                  <Link to={`/inventory?body_type=${item}`} className="text-white/40 hover:text-white text-sm font-body transition-colors duration-200">
-                    {item}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+
 
           <div>
             <h4 className="font-heading text-xs tracking-[0.2em] uppercase text-white/50 mb-6">Areas Served</h4>
