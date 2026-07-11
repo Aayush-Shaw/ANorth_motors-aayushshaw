@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Phone } from 'lucide-react';
+import { Menu, X, Phone, Sun, Moon } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { user } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -20,10 +22,45 @@ export default function Navbar() {
   const navLinks = [
     { href: '/loan-calculator', label: 'Loan Calculator' },
     { href: '/financing', label: 'Financing' },
-    { href: '/contact', label: 'Contact' },
+    // { href: '/contact', label: 'Contact' },
   ];
 
   const isActive = (href) => location.pathname === href;
+
+  /* Theme toggle button — reused in desktop and mobile */
+  const ThemeToggle = ({ className = '' }) => (
+    <button
+      type="button"
+      onClick={toggleTheme}
+      className={`relative w-9 h-9 flex items-center justify-center border border-[var(--border-card)] rounded-full text-[var(--text-muted)] hover:text-[var(--gold)] hover:border-[var(--gold)]/40 transition-all duration-300 ${className}`}
+      data-testid="theme-toggle"
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      <AnimatePresence mode="wait" initial={false}>
+        {theme === 'dark' ? (
+          <motion.div
+            key="sun"
+            initial={{ opacity: 0, rotate: -90, scale: 0.5 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: 90, scale: 0.5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Sun size={16} />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="moon"
+            initial={{ opacity: 0, rotate: 90, scale: 0.5 }}
+            animate={{ opacity: 1, rotate: 0, scale: 1 }}
+            exit={{ opacity: 0, rotate: -90, scale: 0.5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Moon size={16} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </button>
+  );
 
   return (
     <motion.nav
@@ -40,8 +77,8 @@ export default function Navbar() {
               AN
             </div>
             <div>
-              <p className="font-heading font-semibold text-white text-sm tracking-widest uppercase">AutoNorth</p>
-              <p className="text-white/40 text-xs tracking-[0.15em] uppercase">Motors</p>
+              <p className="font-heading font-semibold text-[var(--text-primary)] text-sm tracking-widest uppercase">AutoNorth</p>
+              <p className="text-[var(--text-muted)] text-xs tracking-[0.15em] uppercase">Motors</p>
             </div>
           </Link>
 
@@ -51,7 +88,7 @@ export default function Navbar() {
                 key={link.href}
                 to={link.href}
                 className={`font-body text-xs tracking-[0.15em] uppercase transition-colors duration-200 ${
-                  isActive(link.href) ? 'text-[#D4AF37]' : 'text-white/60 hover:text-white'
+                  isActive(link.href) ? 'text-[#D4AF37]' : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                 }`}
                 data-testid={`nav-link-${link.label.toLowerCase()}`}
               >
@@ -61,10 +98,10 @@ export default function Navbar() {
           </div>
 
           <div className="hidden md:flex items-center gap-4">
-            <a href="tel:+18256055050" className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-xs font-body tracking-wider">
+            {/* <a href="tel:+18256055050" className="flex items-center gap-2 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors text-xs font-body tracking-wider">
               <Phone size={14} />
               <span>825-605-5050</span>
-            </a>
+            </a> */}
             {user && (
               <button
                 onClick={() => navigate('/admin/dashboard')}
@@ -74,15 +111,19 @@ export default function Navbar() {
                 Dashboard
               </button>
             )}
+            <ThemeToggle />
           </div>
 
-          <button
-            className="md:hidden text-white/70 hover:text-white"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            data-testid="nav-mobile-toggle"
-          >
-            {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          <div className="flex md:hidden items-center gap-3">
+            <ThemeToggle />
+            <button
+              className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              data-testid="nav-mobile-toggle"
+            >
+              {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -92,14 +133,14 @@ export default function Navbar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="md:hidden nav-blur border-t border-white/5"
+            className="md:hidden nav-blur border-t border-[var(--border-card)]"
           >
             <div className="px-6 py-6 flex flex-col gap-6">
               {navLinks.map((link) => (
                 <Link
                   key={link.href}
                   to={link.href}
-                  className="text-white/70 font-body text-sm tracking-widest uppercase hover:text-[#D4AF37] transition-colors"
+                  className="text-[var(--text-muted)] font-body text-sm tracking-widest uppercase hover:text-[#D4AF37] transition-colors"
                   onClick={() => setMobileOpen(false)}
                 >
                   {link.label}

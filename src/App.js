@@ -2,13 +2,14 @@ import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
-import ChatBot from './components/ChatBot';
+// import ChatBot from './components/ChatBot';
 import GlobalPreloader from './components/GlobalPreloader';
 
-import Home from './pages/Home';
-import Inventory from './pages/Inventory';
-import VehicleDetail from './pages/VehicleDetail';
+// import Home from './pages/Home';
+// import Inventory from './pages/Inventory';
+// import VehicleDetail from './pages/VehicleDetail';
 import Financing from './pages/Financing';
 import LoanCalculatorPage from './pages/LoanCalculatorPage';
 import Contact from './pages/Contact';
@@ -37,14 +38,17 @@ function AppContent() {
     <>
       <ScrollToTop />
       <GlobalPreloader />
-      {!isAdmin && <ChatBot />}
+      {/* {!isAdmin && <ChatBot />} */}
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* <Route path="/" element={<Home />} /> */}
         {/* <Route path="/inventory" element={<Inventory />} /> */}
         {/* <Route path="/vehicle/:id" element={<VehicleDetail />} /> */}
+        
+        <Route path="/" element={<LoanCalculatorPage />} />
+
         <Route path="/financing" element={<Financing />} />
-        <Route path="/loan-calculator" element={<LoanCalculatorPage />} />
-        <Route path="/contact" element={<Contact />} />
+        {/* <Route path="/loan-calculator" element={<LoanCalculatorPage />} /> */}
+        {/* <Route path="/contact" element={<Contact />} /> */}
         {/* <Route path="/showroom" element={<React.Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-[#D4AF37]">Loading Showroom...</div>}><Showroom /></React.Suspense>} /> */}
         <Route path="/admin" element={<AdminLogin />} />
         <Route path="/admin/dashboard" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
@@ -61,11 +65,13 @@ function AppContent() {
 function App() {
   return (
     <HelmetProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <AppContent />
-        </BrowserRouter>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider>
+          <BrowserRouter>
+            <AppContent />
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </HelmetProvider>
   );
 }

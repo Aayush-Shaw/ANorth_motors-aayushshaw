@@ -6,7 +6,7 @@ import axios from 'axios';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import VehicleCard from '../components/VehicleCard';
-import ExitIntentPopup from '../components/ExitIntentPopup';
+// import ExitIntentPopup from '../components/ExitIntentPopup';
 import { Helmet } from 'react-helmet-async';
 
 const API = (process.env.REACT_APP_BACKEND_URL || '') + '/api';
@@ -120,7 +120,7 @@ export default function Home() {
 
       <div className="bg-[#050505] min-h-screen font-body selection:bg-[#D4AF37]/30" data-testid="home-page">
         <Navbar />
-        <ExitIntentPopup />
+        {/* <ExitIntentPopup /> */}
 
         {/* ── Hero ── */}
         <section className="relative min-h-screen flex items-center overflow-hidden" data-testid="hero-section">

@@ -17,7 +17,7 @@ export default function GlobalPreloader() {
         <motion.div
           initial={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.8, ease: "easeInOut" } }}
-          className="fixed inset-0 z-[9999] bg-[#050505] flex flex-col items-center justify-center overflow-hidden"
+          className="fixed inset-0 z-[9999] bg-[var(--bg-page)] flex flex-col items-center justify-center overflow-hidden"
         >
           {/* Background Ambient Light */}
           <div className="absolute inset-0 flex items-center justify-center">
@@ -46,7 +46,7 @@ export default function GlobalPreloader() {
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1, delay: 0.5, ease: "easeOut" }}
-                className="text-white font-heading font-bold text-3xl md:text-4xl tracking-tighter"
+                className="text-[var(--text-primary)] font-heading font-bold text-3xl md:text-4xl tracking-tighter"
               >
                 AUTONORTH <span className="text-[#D4AF37]">MOTORS</span>
               </motion.h1>
@@ -54,7 +54,7 @@ export default function GlobalPreloader() {
                 initial={{ y: 10, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ duration: 1, delay: 0.8, ease: "easeOut" }}
-                className="text-white/40 font-body text-xs md:text-sm tracking-[0.3em] uppercase mt-2"
+                className="text-[var(--text-muted)] font-body text-xs md:text-sm tracking-[0.3em] uppercase mt-2"
               >
                 Premium Vehicles
               </motion.p>
@@ -63,7 +63,7 @@ export default function GlobalPreloader() {
           
           {/* Loading Bar */}
           <motion.div 
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-white/10"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 w-48 h-[1px] bg-[var(--border-card)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1 }}

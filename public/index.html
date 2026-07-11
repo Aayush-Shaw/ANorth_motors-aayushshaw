@@ -89,6 +89,14 @@
         src="https://www.facebook.com/tr?id=YOUR_PIXEL_ID&ev=PageView&noscript=1"
         /></noscript>
         <!-- End Meta Pixel Code -->
+
+        <!-- Theme flash-prevention: set data-theme synchronously before first paint -->
+        <script>
+          (function() {
+            var theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+          })();
+        </script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
