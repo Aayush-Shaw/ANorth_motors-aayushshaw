@@ -22,6 +22,7 @@
   --error-text: #fca5a5;
   --nav-blur-bg: rgba(5, 5, 5, 0.88);
   --nav-blur-border: rgba(255, 255, 255, 0.04);
+  --scroll-bar: #D4AF37;
   --stepper-bg: rgba(255, 255, 255, 0.04);
   --stepper-bg-disabled: rgba(255, 255, 255, 0.02);
   --stepper-border: rgba(255, 255, 255, 0.10);
@@ -47,7 +48,7 @@
   --text-primary: #1A1A1A;
   --text-muted: #5C5648;
   --text-faint: #8A8371;
-  --text-gold: #8A6310;
+  --text-gold: #000000;
   --track-inactive: #D9CFB8;
   --gold: #D4AF37;
   --error-bg: #FBEAE9;
@@ -55,6 +56,7 @@
   --error-text: #B3261E;
   --nav-blur-bg: rgba(237, 230, 216, 0.92);
   --nav-blur-border: rgba(212, 175, 55, 0.15);
+  --scroll-bar: #8A6310;
   --stepper-bg: rgba(212, 175, 55, 0.08);
   --stepper-bg-disabled: rgba(212, 175, 55, 0.03);
   --stepper-border: rgba(212, 175, 55, 0.20);
@@ -64,9 +66,9 @@
   --stepper-icon-hover: #75540D;
   --stepper-border-hover: rgba(212, 175, 55, 0.60);
   --stepper-bg-hover: rgba(212, 175, 55, 0.15);
-  --gradient-start: #A07A19;
-  --gradient-mid: #C9A227;
-  --gradient-end: #8A6310;
+  --gradient-start: #000000;
+  --gradient-mid: #8A6310;
+  --gradient-end: #000000;
   --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
   --card-inset: inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
@@ -101,8 +103,13 @@ h6 {
   font-family: 'Outfit', sans-serif;
 }
 
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scroll-bar) var(--bg-page);
+}
+
 ::-webkit-scrollbar {
-  width: 3px;
+  width: 14px;
 }
 
 ::-webkit-scrollbar-track {
@@ -111,6 +118,31 @@ h6 {
 
 ::-webkit-scrollbar-thumb {
   background: #D4AF37;
+  border-radius: 8px;
+  border: 3px solid var(--bg-page);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e0bf4f;
+}
+
+::-webkit-scrollbar-button:single-button {
+  display: block;
+  background-color: var(--bg-page);
+  height: 14px;
+  width: 14px;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:decrement {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 7L5 3L9 7' fill='none' stroke='%23D4AF37' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+::-webkit-scrollbar-button:single-button:vertical:increment {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 10'%3E%3Cpath d='M1 3L5 7L9 3' fill='none' stroke='%23D4AF37' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
 }
 
 ::selection {

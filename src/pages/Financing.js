@@ -66,9 +66,9 @@ export default function Financing() {
           {theme === 'dark' && (
             <div 
               className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-fixed bg-no-repeat"
-              style={{ backgroundImage: 'url(/luxury_showroom_hero_bg_1777279800612.png)' }}
+              style={{ backgroundImage: 'url(/clean_luxury_showroom_no_text_1777282813141.png)' }}
             >
-              <div className="absolute inset-0 bg-[#050505]/80"></div>
+              <div className="absolute inset-0 bg-[#050505]/90"></div>
             </div>
           )}
           <div className="relative z-50">

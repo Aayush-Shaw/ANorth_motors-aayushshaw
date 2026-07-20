@@ -20,8 +20,8 @@ export default function Navbar() {
   }, []);
 
   const navLinks = [
-    { href: '/loan-calculator', label: 'Loan Calculator' },
-    { href: '/financing', label: 'Financing' },
+    { href: '/loan-calculator', label: 'Auto Loan Calculator' },
+    // { href: '/financing', label: 'Financing' },
     // { href: '/contact', label: 'Contact' },
   ];
 
@@ -116,18 +116,18 @@ export default function Navbar() {
 
           <div className="flex md:hidden items-center gap-3">
             <ThemeToggle />
-            <button
+            {/* <button
               className="text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               onClick={() => setMobileOpen(!mobileOpen)}
               data-testid="nav-mobile-toggle"
             >
               {mobileOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            </button> */}
           </div>
         </div>
       </div>
 
-      <AnimatePresence>
+      {/* <AnimatePresence>
         {mobileOpen && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
@@ -149,7 +149,7 @@ export default function Navbar() {
             </div>
           </motion.div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </motion.nav>
   );
 }

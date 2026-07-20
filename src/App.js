@@ -5,12 +5,12 @@ import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import ProtectedRoute from './components/ProtectedRoute';
 // import ChatBot from './components/ChatBot';
-import GlobalPreloader from './components/GlobalPreloader';
+// import GlobalPreloader from './components/GlobalPreloader';
 
 // import Home from './pages/Home';
 // import Inventory from './pages/Inventory';
 // import VehicleDetail from './pages/VehicleDetail';
-import Financing from './pages/Financing';
+// import Financing from './pages/Financing';
 import LoanCalculatorPage from './pages/LoanCalculatorPage';
 import Contact from './pages/Contact';
 import AdminLogin from './pages/AdminLogin';
@@ -37,7 +37,7 @@ function AppContent() {
   return (
     <>
       <ScrollToTop />
-      <GlobalPreloader />
+      {/* <GlobalPreloader /> */}
       {/* {!isAdmin && <ChatBot />} */}
       <Routes>
         {/* <Route path="/" element={<Home />} /> */}
@@ -46,7 +46,7 @@ function AppContent() {
         
         <Route path="/" element={<LoanCalculatorPage />} />
 
-        <Route path="/financing" element={<Financing />} />
+        {/* <Route path="/financing" element={<Financing />} /> */}
         {/* <Route path="/loan-calculator" element={<LoanCalculatorPage />} /> */}
         {/* <Route path="/contact" element={<Contact />} /> */}
         {/* <Route path="/showroom" element={<React.Suspense fallback={<div className="h-screen bg-black flex items-center justify-center text-[#D4AF37]">Loading Showroom...</div>}><Showroom /></React.Suspense>} /> */}

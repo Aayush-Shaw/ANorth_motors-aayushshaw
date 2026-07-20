@@ -54,12 +54,12 @@ export default function LoanCalculatorPage() {
   /* ---------- Field configs — top field swaps based on mode, rest are shared ---------- */
   const topField =
     mode === 'price'
-      ? { label: 'Vehicle Price', key: 'price', min: 5000, max: 2000000, step: 1000, prefix: '$', info: 'How much is your new vehicle? Include any known fees or surcharges. Do not include tax.' }
+      ? { label: 'Vehicle Price', key: 'price', min: 5000, max: 500000, step: 1000, prefix: '$', info: 'How much is your new vehicle? Include any known fees or surcharges. Do not include tax.' }
       : { label: 'Target Monthly Payment', key: 'targetPayment', min: 50, max: 5000, step: 25, prefix: '$', info: 'The monthly payment amount you are aiming for.' };
 
   const sharedFields = [
-    { label: 'Trade-In Value', key: 'tradeInValue', min: 0, max: mode === 'price' ? Math.max(0, inputs.price - 20000) : 1000000, step: 500, prefix: '$', info: 'The estimated value of your current vehicle if you plan to trade it in.' },
-    { label: 'Existing Loan Balance', key: 'existingLoanBalance', min: 0, max: 1000000, step: 500, prefix: '$', info: 'The amount you still owe on your current vehicle, if any.' },
+    { label: 'Trade-In Value', key: 'tradeInValue', min: 0, max: mode === 'price' ? Math.max(0, Math.min(200000, inputs.price - 20000)) : 200000, step: 500, prefix: '$', info: 'The estimated value of your current vehicle if you plan to trade it in.' },
+    { label: 'Existing Loan Balance', key: 'existingLoanBalance', min: 0, max: 100000, step: 500, prefix: '$', info: 'The amount you still owe on your current vehicle, if any.' },
     {
       label: 'Down Payment',
       key: 'downPayment',
@@ -80,8 +80,8 @@ export default function LoanCalculatorPage() {
   const getFieldErrors = () => {
     const errors = {};
 
-    if (!inputs.interestRate || inputs.interestRate <= 0) {
-      errors.interestRate = 'Please enter an interest rate greater than 0%.';
+    if (inputs.interestRate === undefined || inputs.interestRate === null || Number.isNaN(inputs.interestRate) || inputs.interestRate < 0) {
+      errors.interestRate = 'Please enter a valid interest rate (0% or higher).';
     }
     if (!inputs.termMonths || inputs.termMonths <= 0) {
       errors.termMonths = 'Please select a loan term greater than 0 months.';
@@ -91,9 +91,9 @@ export default function LoanCalculatorPage() {
     }
 
     if (mode === 'price' && !errors.interestRate && !errors.termMonths) {
-      const maxTradeIn = inputs.price - 20000;
+      const maxTradeIn = Math.min(200000, inputs.price - 20000);
       if (inputs.tradeInValue > maxTradeIn) {
-        errors.tradeInValue = `Your trade-in value cannot exceed $${Math.max(0, maxTradeIn).toLocaleString()} (Vehicle Price - $20,000).`;
+        errors.tradeInValue = `Your trade-in value cannot exceed $${Math.max(0, maxTradeIn).toLocaleString()} (Vehicle Price - $20,000, capped at $200,000).`;
       }
 
       const financed = calculateAmountFinanced(inputs);
@@ -161,9 +161,9 @@ export default function LoanCalculatorPage() {
           {theme === 'dark' && (
             <div
               className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-fixed bg-no-repeat"
-              style={{ backgroundImage: 'url(/luxury_showroom_hero_bg_1777279800612.png)' }}
+              style={{ backgroundImage: 'url(/clean_luxury_showroom_no_text_1777282813141.png)' }}
             >
-              <div className="absolute inset-0 bg-[#050505]/80"></div>
+              <div className="absolute inset-0 bg-[#050505]/90"></div>
             </div>
           )}
 
@@ -175,7 +175,7 @@ export default function LoanCalculatorPage() {
             {/* ── Hero heading ── */}
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-16">
               <p className="text-xs tracking-[0.2em] uppercase text-[var(--text-gold)] font-heading mb-3">
-                Loan Calculator
+                Auto Loan Calculator
               </p>
               <h1 className="font-heading text-4xl md:text-5xl font-light text-[var(--text-primary)] tracking-tight mb-4">
                 Estimate Your <span className="gradient-text">Payments</span>
@@ -275,9 +275,9 @@ export default function LoanCalculatorPage() {
                               }
                               setInputs((prev) => ({ ...prev, [item.key]: num }));
                             }}
-                            className="bg-transparent text-[var(--text-primary)] font-heading text-base font-semibold flex-1 sm:w-32 text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="bg-transparent text-[var(--text-primary)] font-heading text-base font-semibold flex-1 min-w-0 sm:w-32 text-right focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
-                          {item.suffix && <span className="text-[var(--text-muted)] text-sm font-medium ml-1">{item.suffix}</span>}
+                          {item.suffix && <span className="text-[var(--text-muted)] text-sm font-medium ml-1 flex-shrink-0 whitespace-nowrap">{item.suffix}</span>}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -490,7 +490,7 @@ export default function LoanCalculatorPage() {
                 </motion.div>
               )}
 
-              {/* ── CTA ── */}
+              {/* ── CTA ──
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -508,6 +508,7 @@ export default function LoanCalculatorPage() {
                   Ready to make it official? Apply on our Financing page — fast approvals, all credit profiles welcome.
                 </p>
               </motion.div>
+              */}
             </motion.div>
           </div>
         </div>
