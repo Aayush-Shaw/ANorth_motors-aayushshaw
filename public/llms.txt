@@ -1,0 +1,11 @@
+# AutoNorth Motors — Canadian Auto Loan Calculator
+
+> AutoNorth Motors is an Edmonton, Alberta auto dealership. This site hosts a free Canadian auto loan / car financing calculator. It estimates monthly, bi-weekly, and weekly vehicle payments, or works backward from a target payment to the maximum affordable vehicle price. Inputs include vehicle price, down payment, trade-in value, existing loan balance on a trade-in, sales tax rate, interest rate (APR), and loan term in months. Payments use the standard amortization formula; Canadian tax is applied to the vehicle price minus the trade-in value.
+
+## Tools
+
+- [Auto Loan Calculator](https://www.autonorth.ca/): Estimate car loan payments (monthly / bi-weekly / weekly), or find your maximum affordable vehicle price for financing in Canada.
+
+## About
+
+- [AutoNorth Motors](https://www.autonorth.ca/): Premium new and used vehicles in Edmonton, Alberta, with car financing and national shipping across Canada.

@@ -68,6 +68,59 @@
         }
         </script>
 
+        <!-- Structured Data (JSON-LD) for the Auto Loan Calculator tool (GEO/AI comprehension) -->
+        <script type="application/ld+json">
+        {
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "WebApplication",
+              "@id": "https://www.autonorth.ca/#loan-calculator",
+              "name": "AutoNorth Motors Auto Loan Calculator",
+              "url": "https://www.autonorth.ca/",
+              "applicationCategory": "FinanceApplication",
+              "operatingSystem": "Web browser",
+              "browserRequirements": "Requires JavaScript",
+              "areaServed": "CA",
+              "inLanguage": "en-CA",
+              "description": "Free Canadian auto loan calculator. Estimate monthly, bi-weekly, or weekly car payments, or work backward from a target payment to your maximum affordable vehicle price. Accounts for vehicle price, down payment, trade-in value, existing loan balance, sales tax, interest rate, and loan term.",
+              "featureList": [
+                "Estimate monthly, bi-weekly, and weekly auto loan payments",
+                "Find maximum affordable vehicle price from a target payment",
+                "Trade-in value and existing loan balance handling",
+                "Adjustable sales tax rate and interest rate",
+                "Total interest paid over the loan term"
+              ],
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "CAD"
+              },
+              "publisher": {
+                "@type": "AutoDealer",
+                "name": "AutoNorth Motors",
+                "@id": "https://www.autonorth.ca"
+              },
+              "about": { "@id": "https://www.autonorth.ca/#auto-loan" }
+            },
+            {
+              "@type": "LoanOrCredit",
+              "@id": "https://www.autonorth.ca/#auto-loan",
+              "name": "Auto Loan / Car Financing",
+              "loanType": "Auto loan",
+              "currency": "CAD",
+              "areaServed": "CA",
+              "feesAndCommissionsSpecification": "The calculator is free to use. Vehicle price may include any known fees or surcharges; Canadian sales tax is applied to the vehicle price minus the trade-in value.",
+              "provider": {
+                "@type": "AutoDealer",
+                "name": "AutoNorth Motors",
+                "@id": "https://www.autonorth.ca"
+              }
+            }
+          ]
+        }
+        </script>
+
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&family=Manrope:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -100,6 +153,66 @@
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div id="root"></div>
+        <div id="root">
+            <!--
+              Semantic fallback for AI crawlers and no-JS clients (bots can't move sliders).
+              React replaces the contents of #root on mount, so human visitors see the
+              interactive calculator instead. Describes only what the tool actually does.
+            -->
+            <article>
+                <h1>Canadian Auto Loan Calculator</h1>
+                <p>
+                    The AutoNorth Motors auto loan calculator estimates your car loan payment. Enter a
+                    vehicle price, interest rate (APR), and loan term in months, and it returns the
+                    <strong>monthly, bi-weekly, and weekly payment</strong> plus the total interest paid
+                    over the life of the loan. A second mode works in reverse: enter a target monthly
+                    payment and it returns the <strong>maximum vehicle price</strong> you can afford. It
+                    also accounts for a down payment, a trade-in value, and any loan still owed on the
+                    trade-in.
+                </p>
+
+                <h2>How the monthly payment is calculated</h2>
+                <p>
+                    Payments use the standard amortization formula. In words: the amount financed is
+                    multiplied by the periodic interest rate, then scaled by a factor that spreads the
+                    interest evenly across every payment so the loan reaches a zero balance on the final
+                    payment.
+                </p>
+                <ul>
+                    <li><strong>Amount financed</strong> = vehicle price − trade-in value + balance owed on the trade-in − down payment + sales tax.</li>
+                    <li><strong>Periodic rate</strong> = annual interest rate (APR) ÷ number of payments per year (12 monthly, 26 bi-weekly, 52 weekly).</li>
+                    <li><strong>Number of payments</strong> = loan term in years × payments per year.</li>
+                    <li><strong>Payment</strong> = amountFinanced × periodicRate × (1 + periodicRate)^n ÷ ((1 + periodicRate)^n − 1), where n is the number of payments. At 0% interest the payment is simply the amount financed ÷ n.</li>
+                </ul>
+
+                <h2>How sales tax is applied</h2>
+                <p>
+                    Sales tax is applied to the vehicle price <em>minus</em> the trade-in value, following
+                    the common Canadian rule that tax is charged on the net amount after a trade-in — not
+                    on the full sticker price. The calculator uses a single adjustable tax-rate field
+                    (0–15%) so it works in any province or territory. The default is
+                    <strong>5% (Alberta GST; Alberta has no PST)</strong>. Buyers in other provinces should
+                    set the field to their combined provincial rate — for example British Columbia (GST + PST),
+                    Ontario (HST), or Quebec (GST + QST).
+                </p>
+
+                <h2>Worked example</h2>
+                <p>
+                    A <strong>$30,000</strong> vehicle financed over <strong>72 months at 7% APR</strong> in
+                    Alberta (5% GST), with no trade-in and no down payment:
+                </p>
+                <ul>
+                    <li>Sales tax: 5% of $30,000 = $1,500</li>
+                    <li>Amount financed: $31,500</li>
+                    <li>Monthly payment: about <strong>$537</strong></li>
+                    <li>Total interest over 72 months: about <strong>$7,167</strong></li>
+                    <li>Total paid: about $38,667</li>
+                </ul>
+                <p>
+                    Figures are estimates for planning only and are not an offer of credit or a guaranteed
+                    rate. Your actual rate and payment depend on lender approval.
+                </p>
+            </article>
+        </div>
     </body>
 </html>
